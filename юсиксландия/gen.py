@@ -124,7 +124,7 @@ def cmd_world():
         print("(мир пока пуст — только мы)")
     if STATES.exists():
         for d in sorted(STATES.iterdir()):
-            if d.is_dir():
+            if d.is_dir() and not d.name.startswith(".") and (d / "state.env").exists():
                 env = {}
                 for line in (d / "state.env").read_text(encoding="utf-8").splitlines():
                     if "=" in line and not line.startswith("#"):
