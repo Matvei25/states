@@ -11,6 +11,7 @@ gen.py — генератор законов, договоров и госуда
 """
 import os
 import sys
+import json
 import random
 import datetime
 from pathlib import Path
@@ -19,6 +20,56 @@ BASE = Path(__file__).parent
 WORLD = BASE / "world.md"
 TREATIES = BASE / "treaties"
 STATES = BASE.parent  # соседние государства живут рядом (~/states/<имя>)
+PEOPLE = BASE.parent / "people.json"  # население мира
+
+# ---------- генератор граждан ----------
+
+FIRST_NAMES = ["Гриша", "Зина", "Коля", "Толик", "Света", "Петрович", "Михалыч", "Люся",
+               "Аркадий", "Раиса", "Гена", "Нюра", "Валера", "Клавдия", "Семён", "Тома",
+               "Эдик", "Маруся", "Федя", "Роза"]
+JOBS = ["сантехник", "продавец", "учитель", "водитель", "пенсионер", "программист", "повар",
+        "почтальон", "сварщик", "библиотекарь", "фермер", "таксист", "пекарь", "электрик",
+        "медсестра", "бармен", "сторож", "бухгалтер"]
+PERSONALITIES = [
+    "ворчливый, но справедливый", "оптимист, верит в лучшее", "консерватор, не доверяет новому",
+    "любит поспорить и доказать своё", "тихий и задумчивый", "балагур, душа компании",
+    "подозрительный ко всему новому", "романтик", "прагматик, считает жёльки",
+    "фанат порядка и законов", "ленивый, но добрый", "хитрый торгаш",
+    "мечтатель, живёт в своём мире", "строгий и принципиальный",
+]
+INTERESTS = ["огород", "хоккей", "сериалы", "шахматы", "рыбалка", "кроссворды", "футбол",
+             "вышивание", "компьютеры", "дача", "музыка", "готовка", "голуби", "мотоциклы"]
+
+
+def load_people():
+    if PEOPLE.exists():
+        return json.loads(PEOPLE.read_text(encoding="utf-8"))
+    return []
+
+
+def save_people(people):
+    PEOPLE.write_text(json.dumps(people, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def cmd_people(n):
+    people = load_people()
+    start = len(people)
+    for i in range(n):
+        p = {
+            "id": f"p-{start + i + 1:03d}",
+            "name": random.choice(FIRST_NAMES),
+            "age": random.randint(18, 75),
+            "job": random.choice(JOBS),
+            "personality": random.choice(PERSONALITIES),
+            "interests": random.sample(INTERESTS, 2),
+            "party": random.choice(["Партия Мемов", "Партия Сна", "беспартийный", "беспартийный", "беспартийный"]),
+            "voted": [],
+        }
+        people.append(p)
+    save_people(people)
+    print(f"👥 родилось {n} граждан. всего населения: {len(people)}")
+    for p in people[start:]:
+        print(f"  • {p['name']} ({p['age']}, {p['job']}): {p['personality']} — {p['party']}")
 
 FLAGS = ["🐸", "🤖", "👾", "🐍", "🍕", "🧀", "🌵", "⚡", "🥶", "🤡", "🐉", "🛸"]
 
@@ -143,8 +194,10 @@ def main():
         cmd_treaty(args[1], " ".join(args[2:]))
     elif args[0] == "state" and len(args) >= 2:
         cmd_state(args[1], " ".join(args[2:]) if len(args) > 2 else "")
+    elif args[0] == "people" and len(args) >= 2 and args[1].isdigit():
+        cmd_people(int(args[1]))
     else:
-        print("использование: gen.py law <тема> | treaty <гос-во> <тема> | state <имя> [лор] | world")
+        print("использование: gen.py law <тема> | treaty <гос-во> <тема> | state <имя> [лор] | people <n> | world")
 
 
 if __name__ == "__main__":
