@@ -4,8 +4,8 @@
 # 2) коммит в git мира (~/states)
 set -u
 
-STATE_DIR="/home/yusmatvei25/states/юсиксландия"
-WORLD_DIR="/home/yusmatvei25/states"
+STATE_DIR="$HOME/states/юсиксландия"
+WORLD_DIR="$HOME/states"
 LOG="$STATE_DIR/tick.log"
 
 {
